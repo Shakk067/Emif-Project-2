@@ -21,7 +21,10 @@ from src.correlation_analysis import (
     summarize_correlation_change,
     summarize_block_correlations,
 )
-
+from src.robustness import (
+    run_breakpoint_robustness,
+    run_no_oil_robustness,
+)
 
 def main():
     raw_df = load_raw_data("data/Data.xlsx")
@@ -141,7 +144,35 @@ def main():
     )
 
     print("\nSaved rolling analysis tables and figures.")
+        # 5. Robustness checks
+    breakpoints = [
+        "2020-02-24",
+        "2020-03-11",
+        "2020-03-23",
+        "2020-06-01",
+    ]
 
+    breakpoint_robustness = run_breakpoint_robustness(
+        returns_df,
+        breakpoints=breakpoints,
+    )
+
+    print("\nBreakpoint robustness:")
+    print(breakpoint_robustness.round(4))
+
+    breakpoint_robustness.to_csv(
+        table_dir / "breakpoint_robustness.csv"
+    )
+
+    no_oil_results = run_no_oil_robustness(
+        returns_df,
+        breakpoint="2020-03-11",
+    )
+
+    for name, table in no_oil_results.items():
+        table.to_csv(table_dir / f"{name}.csv")
+
+    print("\nSaved robustness tables.")
 
 if __name__ == "__main__":
     main()
