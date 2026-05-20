@@ -3,7 +3,11 @@ from pathlib import Path
 from src.data_loader import load_raw_data
 from src.transformations import prepare_returns, split_pre_post_covid
 from src.risk_metrics import compare_pre_post_risk
-from src.plots import plot_volatility_change
+from src.plots import (
+    plot_volatility_change,
+    plot_block_correlation_change,
+    plot_correlation_difference_heatmap,
+)
 from src.correlation_analysis import (
     compare_pre_post_correlations,
     summarize_correlation_change,
@@ -65,7 +69,17 @@ def main():
     block_corr_summary.to_csv(table_dir / "block_correlation_summary.csv")
 
     print("\nSaved correlation tables to results/tables/")
+    plot_block_correlation_change(
+        block_corr_summary,
+        output_path=figure_dir / "block_correlation_change.png",
+    )
 
+    plot_correlation_difference_heatmap(
+        corr_diff,
+        output_path=figure_dir / "correlation_difference_heatmap.png",
+    )
+
+    print("Saved correlation figures to results/figures/")
 
 if __name__ == "__main__":
     main()
