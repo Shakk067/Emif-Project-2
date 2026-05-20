@@ -3,6 +3,7 @@ from pathlib import Path
 from src.data_loader import load_raw_data
 from src.transformations import prepare_returns, split_pre_post_covid
 from src.risk_metrics import compare_pre_post_risk
+from src.plots import plot_volatility_change
 
 
 def main():
@@ -25,14 +26,21 @@ def main():
     print(risk_comparison.round(4))
 
     # Save table
-    output_dir = Path("results/tables")
-    output_dir.mkdir(parents=True, exist_ok=True)
+    table_dir = Path("results/tables")
+    table_dir.mkdir(parents=True, exist_ok=True)
 
-    risk_comparison.to_csv(output_dir / "risk_comparison_pre_post.csv")
+    risk_comparison.to_csv(table_dir / "risk_comparison_pre_post.csv")
 
     print("\nSaved table to results/tables/risk_comparison_pre_post.csv")
+
+    # Save figure
+    plot_volatility_change(
+        risk_comparison,
+        output_path="results/figures/volatility_change_pre_post.png",
+    )
+
+    print("Saved figure to results/figures/volatility_change_pre_post.png")
 
 
 if __name__ == "__main__":
     main()
-    
