@@ -1,6 +1,61 @@
 import numpy as np
 import pandas as pd
-from scipy.stats import skew, kurtosis, jarque_bera
+
+
+def compute_skewness(series: pd.Series) -> float:
+    """
+    Manual skewness calculation.
+    """
+    x = series.dropna()
+    mean = x.mean()
+    std = x.std(ddof=0)
+
+    if std == 0:
+        return np.nan
+
+    return np.mean(((x - mean) / std) ** 3)
+
+
+def compute_excess_kurtosis(series: pd.Series) -> float:
+    """
+    Manual excess kurtosis calculation.
+    Normal distribution has excess kurtosis = 0.
+    """
+    x = series.dropna()
+    mean = x.mean()
+    std = x.std(ddof=0)
+
+    if std == 0:
+        return np.nan
+
+    kurtosis = np.mean(((x - mean) / std) ** 4)
+
+    return kurtosis - 3
+
+
+def compute_jarque_bera(series: pd.Series) -> tuple[float, float]:
+    """
+    Manual Jarque-Bera test.
+
+    JB = T * (S^2 / 6 + K^2 / 24)
+
+    where:
+    S = skewness
+    K = excess kurtosis
+
+    Under the null of normality, JB follows chi-square with 2 degrees of freedom.
+    For chi-square(2), p-value = exp(-JB / 2).
+    """
+    x = series.dropna()
+    t = len(x)
+
+    s = compute_skewness(x)
+    k = compute_excess_kurtosis(x)
+
+    jb_stat = t * ((s**2) / 6 + (k**2) / 24)
+    jb_pvalue = np.exp(-jb_stat / 2)
+
+    return jb_stat, jb_pvalue
 
 
 def compute_risk_metrics(returns_df: pd.DataFrame, annualization: int = 252) -> pd.DataFrame:
@@ -26,15 +81,15 @@ def compute_risk_metrics(returns_df: pd.DataFrame, annualization: int = 252) -> 
         var_5 = series.quantile(0.05)
         cvar_5 = series[series <= var_5].mean()
 
-        jb_stat, jb_pvalue = jarque_bera(series)
+        jb_stat, jb_pvalue = compute_jarque_bera(series)
 
         rows.append(
             {
                 "Asset": col,
                 "Mean_ann": series.mean() * annualization,
                 "Vol_ann": series.std() * np.sqrt(annualization),
-                "Skewness": skew(series),
-                "Excess_Kurtosis": kurtosis(series, fisher=True),
+                "Skewness": compute_skewness(series),
+                "Excess_Kurtosis": compute_excess_kurtosis(series),
                 "VaR_5": var_5,
                 "CVaR_5": cvar_5,
                 "JB_stat": jb_stat,
