@@ -79,3 +79,30 @@ def plot_correlation_difference_heatmap(
     plt.tight_layout()
     plt.savefig(output_path, dpi=300)
     plt.close()
+     
+def plot_pca_explained_variance(
+    pca_comparison: pd.DataFrame,
+    output_path: str = "results/figures/pca_explained_variance_pre_post.png",
+    n_components: int = 5,
+) -> None:
+    """
+    Plot explained variance ratios for the first PCA components,
+    before and after COVID.
+    """
+
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    data = pca_comparison.iloc[:n_components][["Explained_pre", "Explained_post"]]
+
+    plt.figure(figsize=(10, 6))
+    data.plot(kind="bar")
+
+    plt.title("PCA: Explained Variance Before and After COVID-19")
+    plt.xlabel("Principal component")
+    plt.ylabel("Explained variance ratio")
+    plt.xticks(rotation=0)
+
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=300)
+    plt.close()     

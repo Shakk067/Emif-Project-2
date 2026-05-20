@@ -1,4 +1,5 @@
 from pathlib import Path
+from src.pca_analysis import compare_pre_post_pca
 
 from src.data_loader import load_raw_data
 from src.transformations import prepare_returns, split_pre_post_covid
@@ -7,7 +8,9 @@ from src.plots import (
     plot_volatility_change,
     plot_block_correlation_change,
     plot_correlation_difference_heatmap,
+    plot_pca_explained_variance,
 )
+
 from src.correlation_analysis import (
     compare_pre_post_correlations,
     summarize_correlation_change,
@@ -80,6 +83,31 @@ def main():
     )
 
     print("Saved correlation figures to results/figures/")
+        # 3. PCA analysis
+    explained_pre, explained_post, pca_comparison, loadings_pre, loadings_post = (
+        compare_pre_post_pca(pre_covid, post_covid)
+    )
 
+    print("\nPCA explained variance comparison:")
+    print(pca_comparison.head(5).round(4))
+
+    print("\nPCA first component loadings pre-COVID:")
+    print(loadings_pre["PC1"].sort_values(ascending=False).round(4))
+
+    print("\nPCA first component loadings post-COVID:")
+    print(loadings_post["PC1"].sort_values(ascending=False).round(4))
+
+    explained_pre.to_csv(table_dir / "pca_explained_variance_pre.csv")
+    explained_post.to_csv(table_dir / "pca_explained_variance_post.csv")
+    pca_comparison.to_csv(table_dir / "pca_explained_variance_comparison.csv")
+    loadings_pre.to_csv(table_dir / "pca_loadings_pre.csv")
+    loadings_post.to_csv(table_dir / "pca_loadings_post.csv")
+
+    plot_pca_explained_variance(
+        pca_comparison,
+        output_path=figure_dir / "pca_explained_variance_pre_post.png",
+    )
+
+    print("\nSaved PCA tables and figures.")
 if __name__ == "__main__":
     main()
