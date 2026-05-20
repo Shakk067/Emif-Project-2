@@ -1,6 +1,9 @@
 from pathlib import Path
 from src.pca_analysis import compare_pre_post_pca
-
+from src.rolling_analysis import (
+    compute_rolling_volatility,
+    compute_rolling_average_correlation,
+)
 from src.data_loader import load_raw_data
 from src.transformations import prepare_returns, split_pre_post_covid
 from src.risk_metrics import compare_pre_post_risk
@@ -9,6 +12,8 @@ from src.plots import (
     plot_block_correlation_change,
     plot_correlation_difference_heatmap,
     plot_pca_explained_variance,
+    plot_rolling_volatility,
+    plot_rolling_average_correlation,
 )
 
 from src.correlation_analysis import (
@@ -109,5 +114,34 @@ def main():
     )
 
     print("\nSaved PCA tables and figures.")
+        # 4. Rolling analysis
+    rolling_vol = compute_rolling_volatility(returns_df, window=252)
+    rolling_corr = compute_rolling_average_correlation(returns_df, window=252)
+
+    rolling_vol.to_csv(table_dir / "rolling_volatility.csv")
+    rolling_corr.to_csv(table_dir / "rolling_average_correlation.csv")
+
+    selected_assets = [
+        "S&P500",
+        "US IG Bonds",
+        "US HY Bonds",
+        "Oil futures",
+        "Gold",
+    ]
+
+    plot_rolling_volatility(
+        rolling_vol,
+        selected_assets,
+        output_path=figure_dir / "rolling_volatility_selected_assets.png",
+    )
+
+    plot_rolling_average_correlation(
+        rolling_corr,
+        output_path=figure_dir / "rolling_average_correlation.png",
+    )
+
+    print("\nSaved rolling analysis tables and figures.")
+
+
 if __name__ == "__main__":
     main()

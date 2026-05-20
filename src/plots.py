@@ -105,4 +105,56 @@ def plot_pca_explained_variance(
 
     plt.tight_layout()
     plt.savefig(output_path, dpi=300)
-    plt.close()     
+    plt.close()  
+
+def plot_rolling_volatility(
+    rolling_vol: pd.DataFrame,
+    assets: list[str],
+    output_path: str = "results/figures/rolling_volatility_selected_assets.png",
+) -> None:
+    """
+    Plot rolling annualized volatility for selected assets.
+    """
+
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    plt.figure(figsize=(12, 7))
+
+    for asset in assets:
+        plt.plot(rolling_vol.index, rolling_vol[asset], label=asset)
+
+    plt.axvline(pd.to_datetime("2020-03-11"), linewidth=1, linestyle="--")
+    plt.title("Rolling Annualized Volatility")
+    plt.xlabel("Date")
+    plt.ylabel("Annualized volatility")
+    plt.legend()
+
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=300)
+    plt.close()
+
+
+def plot_rolling_average_correlation(
+    rolling_corr: pd.Series,
+    output_path: str = "results/figures/rolling_average_correlation.png",
+) -> None:
+    """
+    Plot rolling average pairwise correlation across all assets.
+    """
+
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    plt.figure(figsize=(12, 6))
+
+    plt.plot(rolling_corr.index, rolling_corr.values)
+
+    plt.axvline(pd.to_datetime("2020-03-11"), linewidth=1, linestyle="--")
+    plt.title("Rolling Average Cross-Asset Correlation")
+    plt.xlabel("Date")
+    plt.ylabel("Average pairwise correlation")
+
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=300)
+    plt.close()   
